@@ -1,0 +1,12 @@
+{
+  "name": "socket-chat-room",
+  "version": "1.0.0",
+  "description": "my first socket.io app",
+  "dependencies": {
+    "body-parser": "~1.15.1",
+    "express": "^4.14.0",
+    "mongodb": "^2.2.8",
+    "mongoose": "^4.5.10",
+    "socket.io": "^1.4.8"
+  }
+}

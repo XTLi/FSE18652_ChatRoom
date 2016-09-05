@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+  <head>
+    <meta charset="utf-8"> 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <title>Chat Room</title>
+    <style>
+      * { 
+        margin: 0; 
+        padding: 0; 
+        box-sizing: border-box; 
+      } 
+      #messageDiv {
+        height: 500px;
+        border-style: groove;
+        overflow: auto;
+      }
+      #messageInputDiv {
+        border-style: groove;
+        margin-top: 20px;
+      }
+      #onlineUserDiv {
+        height: 570px;
+        border-style: groove;
+        overflow: auto;
+      }
+      #bntSend {
+        width: 12%;
+        height: 30px;
+      }
+      #content {
+        width: 85%;
+        height: 50px;
+      }
+      #messageList {
+        background-color: #AAAAAA;
+        margin-top: 5px;
+        margin-bottom: 5px;  
+      }
+      p.name {
+        font-size: 20px;
+        font-weight: bold;
+        font-family: "Arial";
+        /*font-style: ;*/
+      }
+
+      p.time {
+        font-size: 15px;
+        font-weight: lighter;
+        font-family: "Times New Roman";
+       /* font-style: ;*/
+      }
+
+      p.message {
+        font-size: 15px;
+        font-weight: normal;
+        font-family: "Times New Roman";
+        /*font-style: ;*/
+      }
+
+      p.label {
+        color: #000000;
+        font-size: 25px;
+        font-weight: bold;
+        font-family: "Arial";
+        /*font-style: ;*/
+      }
+
+      label.head {
+        font-size: 25px;
+        font-weight: bold;
+        font-family: "Arial";
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="header">
+      <br>
+      <label class="head">Welcome, </label>
+    </div>  
+      <div class="col-md-6">
+        <div id="messageDiv">
+          <ul id = "messages"></ul>
+        </div>
+        <div id="messageInputDiv">
+        <form id = "messageInput">
+          <div class="form-inline">
+            <input id="content" autocomplete="off"></input>
+            <button id = "bntSend">SEND</button>
+          </div>
+         </form>
+       </div>
+      </div>
+      <div id="onlineUserDiv" class="col-md-3">
+        <p class="label">Online Users:</p><br>
+        <ul id="userList"></ul>
+      </div>
+          
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      var socket = io();
+      var username
+      $('#messageInput').submit(function() {
+        if($('#content').val() != '') {
+          socket.emit('chat message', $('#content').val());
+          $('#content').val('');
+        }
+        return false;
+      });
+
+      socket.once('history messages', function(message) {
+          for(var i = 0; i < message.length; i ++) {
+            var tempHistoyMessage = message[i];
+             var messageBlock = '<li id="messageList"><div class="row"><div class="col-md-6"><p class="name">' +
+                            tempHistoyMessage.name +
+                            ' : </p></div><div class="col-md-6"><p class="time"> @ ' +
+                            tempHistoyMessage.time +
+                            '</p></div></div><p class="message">' +
+                            tempHistoyMessage.message + 
+                            '</p></li>';
+            $('#messages').append(messageBlock);
+            var messageDiv = document.getElementById('messageDiv');
+            messageDiv.scrollTop = messageDiv.scrollHeight;
+          }
+      });
+
+      socket.once('username', function(username) {
+        $('#header').append('<label class="head" style="color: #4682B4">' + username + '</label>');
+      }); 
+
+      socket.on('chat message', function(message) {
+        var messageBlock = '<li id="messageList"><div class="row"><div class="col-md-6"><p class="name">' +
+                            message.name +
+                            ' : </p></div><div class="col-md-6"><p class="time"> @ ' +
+                            message.time +
+                            '</p></div></div><p class="message">' +
+                            message.message + 
+                            '</p></li>';
+        $('#messages').append(messageBlock);
+        var messageDiv = document.getElementById('messageDiv');
+        messageDiv.scrollTop = messageDiv.scrollHeight;
+      });
+
+      socket.on('user list update', function(usernameList) {
+        var userList = '';
+        usernameList.forEach(function(item, index, array) {
+          userList = userList + '<li><p style="font-size: 20px">' + item + '</li>';
+        });
+        $('#userList').html(userList);
+
+      });
+     </script>
+
+  </body>
+</html>
